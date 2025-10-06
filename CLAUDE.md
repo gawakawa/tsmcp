@@ -20,22 +20,17 @@ project is inspired by the implementation patterns from `../lsmcp/` and
 # Development
 pnpm dev                        # Run development task with hot reload
 pnpm start                      # Run production build
-
-# Testing  
-pnpm test                       # Run tests
-pnpm test:watch                 # Run tests with watch mode
+pnpm build                      # Build for production
 
 # Type Checking
 pnpm type-check                 # Type check all TypeScript files
-pnpm tsc                        # Run TypeScript compiler
 
-# Formatting
+# Formatting and Linting (using Biome)
 pnpm format                     # Format all files
 pnpm format:check              # Check formatting without changes
-
-# Linting
 pnpm lint                       # Lint all files
 pnpm lint:fix                   # Fix linting issues
+pnpm check                      # Check and fix everything
 ```
 
 ## Architecture Goals
@@ -49,20 +44,20 @@ Based on the reference implementations, this MCP should provide:
 - **Code Quality**: Diagnostics, code actions, formatting
 - **Code Modification**: Rename symbols, text edits, refactoring
 
-### MCP Tools to Implement
+### MCP Tools (Implemented)
 
 Following lsmcp patterns:
 
-- `get_project_overview` - Understand codebase structure
-- `search_symbols` - Find TypeScript symbols by name/kind
-- `get_symbol_details` - Comprehensive symbol information
-- `lsp_get_definitions` - Navigate to definitions
-- `lsp_find_references` - Find all references
-- `lsp_get_hover` - Get type information
-- `lsp_get_completion` - Code completion
-- `lsp_get_diagnostics` - Error checking
-- `lsp_rename_symbol` - Safe refactoring
-- `lsp_format_document` - Code formatting
+- `get_project_overview` - Understand codebase structure ✓
+- `list_dir` - List files and directories ✓
+- `search_symbols` - Find TypeScript symbols by name/kind ✓
+- `get_symbol_details` - Comprehensive symbol information ✓
+- `lsp_get_definitions` - Navigate to definitions ✓
+- `lsp_find_references` - Find all references ✓
+- `lsp_get_hover` - Get type information ✓
+- `lsp_get_completion` - Code completion ✓
+- `lsp_get_diagnostics` - Error checking ✓
+- `lsp_format_document` - Code formatting ✓
 
 ### TypeScript-Specific Features
 
@@ -82,20 +77,30 @@ Following lsmcp patterns:
 - Follow Node.js/TypeScript conventions
 - Use interface over type for object definitions
 
-### File Structure (Planned)
+### File Structure
 
 ```
 tsmcp/
 ├── src/
-│   ├── main.ts          # MCP server entry point
-│   ├── lsp/             # LSP client implementation
-│   ├── tools/           # MCP tool implementations
-│   ├── config/          # Configuration handling
-│   └── utils/           # Utility functions
-├── tests/               # Test files
-├── package.json        # pnpm configuration and scripts
-├── tsconfig.json       # TypeScript configuration
-└── CLAUDE.md           # This file
+│   ├── main.ts                # MCP server entry point
+│   ├── lsp/                   # LSP client implementation
+│   │   └── client.ts          # TypeScript LSP client
+│   ├── tools/                 # MCP tool implementations
+│   │   ├── lspTools.ts        # LSP-specific tools (hover, definitions, etc.)
+│   │   ├── symbolTools.ts     # Symbol search and details
+│   │   ├── projectOverview.ts # Project analysis
+│   │   └── fileSystem.ts      # File system operations
+│   ├── config/                # Configuration handling
+│   │   └── config.ts          # Server configuration
+│   ├── utils/                 # Utility functions
+│   │   ├── pathUtils.ts       # Path and URI utilities
+│   │   └── errorHandler.ts    # Error handling utilities
+│   └── types.ts               # Type definitions
+├── package.json              # pnpm configuration and scripts
+├── tsconfig.json             # TypeScript configuration
+├── biome.json                # Biome formatter/linter config
+├── CLAUDE.md                 # This file (guidance for Claude Code)
+└── README.md                 # Project documentation
 ```
 
 ### Error Handling
@@ -107,10 +112,10 @@ tsmcp/
 
 ### Testing Strategy
 
-- Unit tests for individual functions
-- Integration tests for LSP communication
-- End-to-end tests for MCP protocol
-- Mock TypeScript projects for testing
+- Manual testing with MCP clients (e.g., Claude Desktop, Claude Code)
+- Test with real TypeScript projects of various sizes
+- Verify LSP features work correctly across different scenarios
+- Automated tests planned for future development
 
 ## LSP Integration
 
@@ -151,7 +156,7 @@ The project should integrate with the official TypeScript Language Server:
 **Always run formatting and type checking before completing tasks:**
 
 ```bash
-pnpm format && pnpm type-check && pnpm test
+pnpm check && pnpm type-check
 ```
 
 **Key Considerations:**

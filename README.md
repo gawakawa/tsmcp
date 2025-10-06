@@ -7,28 +7,28 @@ Server to provide comprehensive TypeScript development tools.
 
 ### Core LSP Navigation
 
-- **get_definitions** - Navigate to symbol definitions
-- **find_references** - Find all references to symbols
-- **get_hover_info** - Get type information and documentation
+- **lsp_get_definitions** - Navigate to symbol definitions
+- **lsp_find_references** - Find all references to symbols
+- **lsp_get_hover** - Get type information and documentation
 
 ### Code Intelligence
 
-- **get_completions** - Code completion suggestions
-- **get_diagnostics** - Error checking and warnings
+- **lsp_get_completion** - Code completion suggestions
+- **lsp_get_diagnostics** - Error checking and warnings
 
 ### Symbol Analysis
 
-- **get_document_symbols** - List all symbols in a file
-- **search_workspace_symbols** - Search symbols across the workspace
+- **search_symbols** - Search for symbols (classes, functions, variables, etc.)
+- **get_symbol_details** - Get detailed information about a specific symbol
 
 ### Code Modification
 
-- **format_document** - Format TypeScript files
-- **rename_symbol** - Safe symbol renaming across the workspace
+- **lsp_format_document** - Format TypeScript files
 
 ### Project Tools
 
 - **get_project_overview** - Analyze project structure and configuration
+- **list_dir** - List files and directories in the workspace
 
 ## Prerequisites
 
@@ -95,25 +95,19 @@ pnpm dev
 
 ```typescript
 // Get definitions for a symbol
-get_definitions({
-  file_path: "src/main.ts",
-  line: 10,
-  character: 15,
+lsp_get_definitions({
+  location: "src/main.ts:10:15"
 });
 
 // Find all references to a symbol
-find_references({
-  file_path: "src/main.ts",
-  line: 10,
-  character: 15,
-  include_declaration: true,
+lsp_find_references({
+  location: "src/main.ts:10:15",
+  includeDeclaration: true
 });
 
 // Get hover information
-get_hover_info({
-  file_path: "src/main.ts",
-  line: 10,
-  character: 15,
+lsp_get_hover({
+  location: "src/main.ts:10:15"
 });
 ```
 
@@ -121,31 +115,28 @@ get_hover_info({
 
 ```typescript
 // Get code completions
-get_completions({
-  file_path: "src/main.ts",
-  line: 10,
-  character: 15,
-  limit: 20,
+lsp_get_completion({
+  location: "src/main.ts:10:15",
+  maxResults: 20
 });
 
 // Get diagnostics (errors/warnings)
-get_diagnostics({
-  file_path: "src/main.ts",
+lsp_get_diagnostics({
+  file: "src/main.ts"
 });
 ```
 
 ### Symbol Analysis
 
 ```typescript
-// Get all symbols in a document
-get_document_symbols({
-  file_path: "src/main.ts",
+// Search for symbols
+search_symbols({
+  query: "MyClass"
 });
 
-// Search workspace symbols
-search_workspace_symbols({
-  query: "MyClass",
-  limit: 50,
+// Get detailed symbol information
+get_symbol_details({
+  location: "src/main.ts:10:15"
 });
 ```
 
@@ -153,18 +144,10 @@ search_workspace_symbols({
 
 ```typescript
 // Format a document
-format_document({
-  file_path: "src/main.ts",
-  tab_size: 2,
-  insert_spaces: true,
-});
-
-// Rename a symbol
-rename_symbol({
-  file_path: "src/main.ts",
-  line: 10,
-  character: 15,
-  new_name: "newSymbolName",
+lsp_format_document({
+  file: "src/main.ts",
+  tabSize: 2,
+  insertSpaces: true
 });
 ```
 
@@ -172,10 +155,11 @@ rename_symbol({
 
 ```typescript
 // Get project overview
-get_project_overview({
-  workspace_path: "/path/to/project",
-  include_node_modules: false,
-  max_depth: 3,
+get_project_overview({});
+
+// List directory contents
+list_dir({
+  path: "src"
 });
 ```
 
@@ -197,28 +181,24 @@ get_project_overview({
 ```
 tsmcp/
 ├── src/
-│   ├── main.ts          # MCP server entry point
-│   ├── lsp/             # LSP client implementation
-│   │   └── client.ts    # TypeScript LSP client
-│   ├── tools/           # MCP tool implementations
-│   │   ├── definitions.ts
-│   │   ├── references.ts
-│   │   ├── hover.ts
-│   │   ├── completion.ts
-│   │   ├── symbols.ts
-│   │   ├── diagnostics.ts
-│   │   ├── formatting.ts
-│   │   ├── rename.ts
-│   │   ├── project.ts
-│   │   └── index.ts     # Tool factory
-│   ├── config/          # Configuration management
-│   │   └── config.ts
-│   ├── utils/           # Utility functions
-│   │   └── uri.ts
-│   └── types.ts         # Type definitions
-├── package.json        # pnpm configuration and scripts
-├── tsconfig.json       # TypeScript configuration
-└── README.md           # This file
+│   ├── main.ts                # MCP server entry point
+│   ├── lsp/                   # LSP client implementation
+│   │   └── client.ts          # TypeScript LSP client
+│   ├── tools/                 # MCP tool implementations
+│   │   ├── lspTools.ts        # LSP-specific tools (hover, definitions, etc.)
+│   │   ├── symbolTools.ts     # Symbol search and details
+│   │   ├── projectOverview.ts # Project analysis
+│   │   └── fileSystem.ts      # File system operations
+│   ├── config/                # Configuration management
+│   │   └── config.ts          # Server configuration
+│   ├── utils/                 # Utility functions
+│   │   ├── pathUtils.ts       # Path and URI utilities
+│   │   └── errorHandler.ts    # Error handling utilities
+│   └── types.ts               # Type definitions
+├── package.json              # pnpm configuration and scripts
+├── tsconfig.json             # TypeScript configuration
+├── biome.json                # Biome formatter/linter config
+└── README.md                 # This file
 ```
 
 ## Configuration
@@ -266,244 +246,14 @@ pnpm start 2>debug.log
 
 ## Testing
 
-This project provides multiple levels of testing to ensure the TypeScript LSP
-MCP server works correctly.
-
-### Unit Tests
-
-Run the basic unit tests to verify core functionality:
-
 ```bash
-# Run all tests
+# Run tests (when implemented)
 pnpm test
-
-# Run tests with coverage
-pnpm test:coverage
-
-# Run tests in watch mode
-pnpm test:watch
 ```
 
-The unit tests cover:
-
-- URI conversion utilities (`filePathToUri`, `uriToFilePath`)
-- TypeScript file identification
-- Configuration loading and validation
-- Tool schema validation
-
-### Interactive Testing with Claude Code
-
-The project includes 12 individual slash commands for testing specific LSP
-features:
-
-#### Basic Functionality Tests
-
-```bash
-# Test project overview and structure analysis
-/tsmcp-overview
-
-# Test LSP server connection status  
-/tsmcp-connection
-```
-
-#### Navigation Feature Tests
-
-```bash
-# Test symbol definition lookup
-/tsmcp-definitions [file_path] [line] [character]
-
-# Test reference finding
-/tsmcp-references [file_path] [line] [character]
-
-# Test hover information
-/tsmcp-hover [file_path] [line] [character]
-```
-
-#### Code Intelligence Tests
-
-```bash
-# Test code completion
-/tsmcp-completions [file_path] [line] [character]
-
-# Test diagnostic information (errors/warnings)
-/tsmcp-diagnostics [file_path]
-```
-
-#### Symbol Analysis Tests
-
-```bash
-# Test document symbol extraction
-/tsmcp-document-symbols [file_path]
-
-# Test workspace symbol search
-/tsmcp-workspace-symbols [query] [limit]
-```
-
-#### Code Modification Tests
-
-```bash
-# Test document formatting
-/tsmcp-format [file_path]
-
-# Test symbol rename analysis (analysis only, no actual changes)
-/tsmcp-rename [file_path] [line] [character] [new_name]
-```
-
-#### Error Handling Tests
-
-```bash
-# Test handling of non-existent files
-/tsmcp-error-file
-
-# Test handling of invalid positions
-/tsmcp-error-position
-```
-
-### Comprehensive Testing with Subagent
-
-For systematic testing of all features, use the comprehensive test subagent:
-
-```bash
-# Launch comprehensive test suite
-@tsmcp-comprehensive-test
-```
-
-This subagent will:
-
-1. **Basic Function Tests** - Verify project overview and LSP connection
-2. **Navigation Tests** - Test definitions, references, and hover info
-3. **Code Analysis Tests** - Verify completions and diagnostics
-4. **Symbol Analysis Tests** - Test document and workspace symbols
-5. **Code Modification Tests** - Test formatting and rename analysis
-6. **Error Handling Tests** - Verify proper error responses
-
-Each test phase provides detailed reports with:
-
-- ✅ Pass / ❌ Fail / ⚠️ Warning status
-- Performance metrics (response times)
-- Detailed results and issue identification
-- Improvement recommendations
-
-### Manual Testing Guide
-
-#### Prerequisites for Manual Testing
-
-1. Ensure TypeScript Language Server is installed:
-
-```bash
-npm install -g typescript-language-server typescript
-```
-
-2. Start the MCP server:
-
-```bash
-pnpm start
-```
-
-#### Testing Each Tool
-
-**Project Overview**
-
-```typescript
-get_project_overview({
-  workspace_path: ".",
-  include_node_modules: false,
-  max_depth: 3,
-});
-```
-
-Expected: Project statistics, file counts, directory structure
-
-**Symbol Navigation**
-
-```typescript
-get_definitions({
-  file_path: "main.ts",
-  line: 5,
-  character: 10,
-});
-```
-
-Expected: Definition locations with file paths and positions
-
-**Code Intelligence**
-
-```typescript
-get_completions({
-  file_path: "src/main.ts",
-  line: 10,
-  character: 5,
-  limit: 20,
-});
-```
-
-Expected: Code completion suggestions with details
-
-**Error Detection**
-
-```typescript
-get_diagnostics({
-  file_path: "src/main.ts",
-});
-```
-
-Expected: TypeScript errors and warnings with severity levels
-
-#### Performance Testing
-
-Test with larger codebases to verify:
-
-- Response times under 2 seconds for most operations
-- Proper handling of large symbol searches
-- Memory usage stability during extended sessions
-- Graceful handling of LSP server restarts
-
-#### Integration Testing
-
-Test with real TypeScript projects:
-
-1. **Small Project** (< 10 files): All features should work instantly
-2. **Medium Project** (10-100 files): Features should work within 1-2 seconds
-3. **Large Project** (100+ files): Features should work within 5 seconds
-
-### Troubleshooting Tests
-
-If tests fail, check:
-
-1. **TypeScript Language Server Installation**:
-
-```bash
-which typescript-language-server
-typescript-language-server --version
-```
-
-2. **Node.js and Dependencies**:
-
-```bash
-node --version
-pnpm --version
-pnpm install
-pnpm start
-```
-
-3. **LSP Communication**:
-
-```bash
-# Check server logs
-pnpm start 2>debug.log
-cat debug.log
-```
-
-4. **File Permissions**: Ensure the workspace directory is readable and
-   TypeScript files are accessible.
+Currently, the project uses manual testing with MCP clients. Automated tests are planned for future development.
 
 ## Development
-
-### Running Tests
-
-```bash
-pnpm test
-```
 
 ### Type Checking
 
@@ -511,16 +261,31 @@ pnpm test
 pnpm type-check
 ```
 
-### Formatting
+### Formatting and Linting
+
+This project uses [Biome](https://biomejs.dev/) for formatting and linting:
 
 ```bash
+# Format code
 pnpm format
+
+# Check formatting
+pnpm format:check
+
+# Lint code
+pnpm lint
+
+# Lint and fix
+pnpm lint:fix
+
+# Check and fix everything
+pnpm check
 ```
 
-### Linting
+### Building
 
 ```bash
-pnpm lint
+pnpm build
 ```
 
 ## Contributing
