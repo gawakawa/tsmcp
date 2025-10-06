@@ -1,0 +1,1 @@
+プロジェクト構造の概要を取得するために `mcp__tsmcp__get_project_overview` を実行してください。

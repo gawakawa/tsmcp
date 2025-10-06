@@ -1,0 +1,1 @@
+コード補完候補を取得するために `mcp__tsmcp__lsp_get_completion --relativePath "src/main.ts" --line 1 --character 0` を実行してください。

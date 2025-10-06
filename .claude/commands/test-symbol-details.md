@@ -1,0 +1,1 @@
+シンボルの詳細情報を取得するために `mcp__tsmcp__get_symbol_details --symbol "main"` を実行してください。

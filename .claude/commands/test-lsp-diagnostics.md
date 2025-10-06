@@ -1,0 +1,1 @@
+診断情報（エラー・警告）を取得するために `mcp__tsmcp__lsp_get_diagnostics --relativePath "src/main.ts"` を実行してください。

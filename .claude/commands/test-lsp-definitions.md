@@ -1,0 +1,1 @@
+定義への移動機能をテストするために `mcp__tsmcp__lsp_get_definitions --relativePath "src/main.ts" --line 1 --character 0` を実行してください。
