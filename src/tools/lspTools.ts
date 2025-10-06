@@ -46,18 +46,24 @@ export async function lspGetHover(
 					? hover.contents
 					: hover.contents.value;
 
+			// Remove existing code block markers if present to prevent double-nesting
+			const cleanedHoverText = hoverText
+				.replace(/^```[\w]*\n?/gm, "")
+				.replace(/\n?```$/gm, "")
+				.trim();
+
 			text = `# Hover Information
 
-**File**: ${relativePath}  
+**File**: ${relativePath}
 **Position**: ${position.line + 1}:${position.character + 1}
 
 \`\`\`typescript
-${hoverText}
+${cleanedHoverText}
 \`\`\``;
 		} else {
 			text = `# Hover Information
 
-**File**: ${relativePath}  
+**File**: ${relativePath}
 **Position**: ${position.line + 1}:${position.character + 1}
 
 No hover information available at this position.`;
@@ -113,7 +119,7 @@ export async function lspGetDefinitions(
 
 			text = `# Definition Results
 
-**File**: ${relativePath}  
+**File**: ${relativePath}
 **Position**: ${position.line + 1}:${position.character + 1}
 
 Found ${definitions.length} definition(s):
@@ -122,7 +128,7 @@ ${definitionList}`;
 		} else {
 			text = `# Definition Results
 
-**File**: ${relativePath}  
+**File**: ${relativePath}
 **Position**: ${position.line + 1}:${position.character + 1}
 
 No definitions found at this position.`;
@@ -183,7 +189,7 @@ export async function lspFindReferences(
 
 			text = `# References
 
-**File**: ${relativePath}  
+**File**: ${relativePath}
 **Position**: ${position.line + 1}:${position.character + 1}
 
 Found ${references.length} reference(s):
@@ -192,7 +198,7 @@ ${referenceList}`;
 		} else {
 			text = `# References
 
-**File**: ${relativePath}  
+**File**: ${relativePath}
 **Position**: ${position.line + 1}:${position.character + 1}
 
 No references found for this symbol.`;
@@ -249,7 +255,7 @@ export async function lspGetCompletion(
 
 			text = `# Code Completion
 
-**File**: ${relativePath}  
+**File**: ${relativePath}
 **Position**: ${position.line + 1}:${position.character + 1}
 
 Found ${completions.length} completion(s)${allCompletions.length > maxResults ? ` (showing first ${maxResults} of ${allCompletions.length})` : ""}:
@@ -258,7 +264,7 @@ ${completionList}`;
 		} else {
 			text = `# Code Completion
 
-**File**: ${relativePath}  
+**File**: ${relativePath}
 **Position**: ${position.line + 1}:${position.character + 1}
 
 No completions available at this position.`;

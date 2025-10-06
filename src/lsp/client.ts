@@ -228,6 +228,43 @@ export class TypeScriptLSPClient extends EventEmitter {
 		);
 		this.serverCapabilities = result.capabilities;
 		this.connection.sendNotification("initialized");
+
+		// Wait for TypeScript project to be fully loaded
+		await this.waitForProjectReady();
+	}
+
+	private async waitForProjectReady(timeoutMs = 5000): Promise<void> {
+		if (!this.connection) return;
+
+		const startTime = Date.now();
+
+		while (Date.now() - startTime < timeoutMs) {
+			try {
+				// Try a simple workspace symbol query to verify project is loaded
+				const result = await this.connection.sendRequest<unknown>(
+					"workspace/symbol",
+					{ query: "" },
+				);
+
+				// If we get a result (even empty array), project is ready
+				if (result !== null && result !== undefined) {
+					console.log("TypeScript project loaded successfully");
+					return;
+				}
+			} catch (error) {
+				// Project not ready yet, wait and retry
+				if (error instanceof Error && error.message.includes("No Project")) {
+					await new Promise((resolve) => setTimeout(resolve, 500));
+					continue;
+				}
+				// Other errors should be logged but not thrown
+				console.warn("Error checking project readiness:", error);
+			}
+		}
+
+		console.warn(
+			"TypeScript project may not be fully loaded after initialization",
+		);
 	}
 
 	supportsFeature(feature: string): boolean {
