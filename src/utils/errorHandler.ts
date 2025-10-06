@@ -2,7 +2,7 @@
  * Error handling utilities for TypeScript MCP server
  */
 
-import type { ErrorContext } from "../types.js";
+import type { ErrorContext } from '../types.js';
 
 export class TSMCPError extends Error {
 	constructor(
@@ -11,16 +11,16 @@ export class TSMCPError extends Error {
 		public originalError?: Error,
 	) {
 		super(message);
-		this.name = "TSMCPError";
+		this.name = 'TSMCPError';
 	}
 }
 
 export function formatError(error: unknown, context?: ErrorContext): string {
-	let message = "Unknown error";
+	let message = 'Unknown error';
 
 	if (error instanceof Error) {
 		message = error.message;
-	} else if (typeof error === "string") {
+	} else if (typeof error === 'string') {
 		message = error;
 	} else {
 		message = String(error);
@@ -35,7 +35,7 @@ export function formatError(error: unknown, context?: ErrorContext): string {
 			);
 		if (context.symbolName) contextParts.push(`Symbol: ${context.symbolName}`);
 
-		message = `${message} (${contextParts.join(", ")})`;
+		message = `${message} (${contextParts.join(', ')})`;
 	}
 
 	return message;
@@ -46,7 +46,7 @@ export function createErrorResponse(error: unknown, context?: ErrorContext) {
 	return {
 		content: [
 			{
-				type: "text" as const,
+				type: 'text' as const,
 				text: `Error: ${message}`,
 			},
 		],
@@ -72,8 +72,8 @@ export async function withErrorHandling<T>(
 export function isTimeoutError(error: unknown): boolean {
 	if (error instanceof Error) {
 		return (
-			error.message.toLowerCase().includes("timeout") ||
-			error.message.toLowerCase().includes("timed out")
+			error.message.toLowerCase().includes('timeout') ||
+			error.message.toLowerCase().includes('timed out')
 		);
 	}
 	return false;
@@ -82,9 +82,9 @@ export function isTimeoutError(error: unknown): boolean {
 export function isNotSupportedError(error: unknown): boolean {
 	if (error instanceof Error) {
 		return (
-			error.message.includes("not supported") ||
-			error.message.includes("Method not found") ||
-			error.message.includes("Unhandled method")
+			error.message.includes('not supported') ||
+			error.message.includes('Method not found') ||
+			error.message.includes('Unhandled method')
 		);
 	}
 	return false;

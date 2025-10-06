@@ -2,18 +2,18 @@
  * Symbol-related tools for TypeScript MCP server
  */
 
-import { readdirSync } from "node:fs";
-import { join } from "node:path";
-import type { TypeScriptLSPClient } from "../lsp/client.js";
-import type { Location, SymbolDetails, SymbolSearchResult } from "../types.js";
-import { createErrorResponse } from "../utils/errorHandler.js";
+import { readdirSync } from 'node:fs';
+import { join } from 'node:path';
+import type { TypeScriptLSPClient } from '../lsp/client.js';
+import type { Location, SymbolDetails, SymbolSearchResult } from '../types.js';
+import { createErrorResponse } from '../utils/errorHandler.js';
 import {
 	extractPathAndPosition,
 	isTypeScriptFile,
 	pathToUri,
 	readFileContent,
 	uriToPath,
-} from "../utils/pathUtils.js";
+} from '../utils/pathUtils.js';
 
 export async function searchSymbols(
 	lspClient: TypeScriptLSPClient,
@@ -21,12 +21,12 @@ export async function searchSymbols(
 	query: string,
 	maxResults = 50,
 ): Promise<{
-	content: Array<{ type: "text"; text: string }>;
+	content: Array<{ type: 'text'; text: string }>;
 	structuredContent?: { symbols: SymbolSearchResult[]; query: string };
 }> {
 	try {
 		if (!lspClient.isInitialized()) {
-			throw new Error("LSP client is not initialized");
+			throw new Error('LSP client is not initialized');
 		}
 
 		// Try workspace symbol search first
@@ -54,7 +54,7 @@ export async function searchSymbols(
 		return {
 			content: [
 				{
-					type: "text",
+					type: 'text',
 					text,
 				},
 			],
@@ -65,7 +65,7 @@ export async function searchSymbols(
 		};
 	} catch (error) {
 		return createErrorResponse(error, {
-			operation: "searchSymbols",
+			operation: 'searchSymbols',
 			symbolName: query,
 		});
 	}
@@ -76,12 +76,12 @@ export async function getSymbolDetails(
 	root: string,
 	input: string,
 ): Promise<{
-	content: Array<{ type: "text"; text: string }>;
+	content: Array<{ type: 'text'; text: string }>;
 	structuredContent?: SymbolDetails;
 }> {
 	try {
 		if (!lspClient.isInitialized()) {
-			throw new Error("LSP client is not initialized");
+			throw new Error('LSP client is not initialized');
 		}
 
 		const { path: relativePath, position } = extractPathAndPosition(input);
@@ -92,7 +92,7 @@ export async function getSymbolDetails(
 		// If no position provided, try to find the symbol in the file
 		if (!targetPosition) {
 			throw new Error(
-				"Position is required for symbol details. Use format: file.ts:line:column",
+				'Position is required for symbol details. Use format: file.ts:line:column',
 			);
 		}
 
@@ -106,12 +106,12 @@ export async function getSymbolDetails(
 		const references = await lspClient.getReferences(filePath, targetPosition);
 
 		// Extract symbol name from file content or hover information
-		let symbolName = "Unknown";
+		let symbolName = 'Unknown';
 
 		// Try to read the symbol from the file at the given position
 		try {
 			const content = readFileContent(filePath);
-			const lines = content.split("\n");
+			const lines = content.split('\n');
 			if (targetPosition.line < lines.length) {
 				const line = lines[targetPosition.line];
 				const char = targetPosition.character;
@@ -133,12 +133,12 @@ export async function getSymbolDetails(
 		}
 
 		// If we still don't have a good symbol name, try parsing hover text
-		if (symbolName === "Unknown" && hover?.contents) {
+		if (symbolName === 'Unknown' && hover?.contents) {
 			const hoverText = Array.isArray(hover.contents)
 				? hover.contents
-						.map((c) => (typeof c === "string" ? c : c.value))
-						.join(" ")
-				: typeof hover.contents === "string"
+						.map((c) => (typeof c === 'string' ? c : c.value))
+						.join(' ')
+				: typeof hover.contents === 'string'
 					? hover.contents
 					: hover.contents.value;
 
@@ -181,7 +181,7 @@ export async function getSymbolDetails(
 			hover,
 			definitions,
 			references,
-			detail: hover ? "Symbol with type information" : "Symbol",
+			detail: hover ? 'Symbol with type information' : 'Symbol',
 		};
 
 		const text = formatSymbolDetails(symbolDetails);
@@ -189,7 +189,7 @@ export async function getSymbolDetails(
 		return {
 			content: [
 				{
-					type: "text",
+					type: 'text',
 					text,
 				},
 			],
@@ -197,7 +197,7 @@ export async function getSymbolDetails(
 		};
 	} catch (error) {
 		return createErrorResponse(error, {
-			operation: "getSymbolDetails",
+			operation: 'getSymbolDetails',
 			file: input,
 		});
 	}
@@ -236,7 +236,7 @@ async function searchSymbolsInFiles(
 	function searchInFile(filePath: string): void {
 		try {
 			const content = readFileContent(filePath);
-			const lines = content.split("\n");
+			const lines = content.split('\n');
 
 			for (let i = 0; i < lines.length && results.length < maxResults; i++) {
 				const line = lines[i];
@@ -245,7 +245,7 @@ async function searchSymbolsInFiles(
 				if (index >= 0) {
 					// Look for word boundaries
 					const wordMatch = line.match(
-						new RegExp(`\\b\\w*${query}\\w*\\b`, "i"),
+						new RegExp(`\\b\\w*${query}\\w*\\b`, 'i'),
 					);
 					if (wordMatch) {
 						const symbolName = wordMatch[0];
@@ -277,12 +277,12 @@ async function searchSymbolsInFiles(
 
 function shouldExcludeDirectory(name: string): boolean {
 	return [
-		"node_modules",
-		".git",
-		"dist",
-		"build",
-		".next",
-		"coverage",
+		'node_modules',
+		'.git',
+		'dist',
+		'build',
+		'.next',
+		'coverage',
 	].includes(name);
 }
 
@@ -302,13 +302,13 @@ No symbols found matching "${query}".`;
 			const line = symbol.location.range.start.line + 1;
 			const container = symbol.containerName
 				? ` (in ${symbol.containerName})`
-				: "";
+				: '';
 
 			return `- **${symbol.name}** ${container}
   - Type: ${symbol.detail || getSymbolKindName(symbol.kind)}
   - Location: ${location}:${line}`;
 		})
-		.join("\n\n");
+		.join('\n\n');
 
 	return `# Symbol Search Results
 
@@ -332,9 +332,9 @@ function formatSymbolDetails(details: SymbolDetails): string {
 	if (details.hover?.contents) {
 		const hoverText = Array.isArray(details.hover.contents)
 			? details.hover.contents
-					.map((c) => (typeof c === "string" ? c : c.value))
-					.join("\n")
-			: typeof details.hover.contents === "string"
+					.map((c) => (typeof c === 'string' ? c : c.value))
+					.join('\n')
+			: typeof details.hover.contents === 'string'
 				? details.hover.contents
 				: details.hover.contents.value;
 
@@ -364,33 +364,33 @@ function formatSymbolDetails(details: SymbolDetails): string {
 
 function getSymbolKindName(kind: number): string {
 	const kindNames: Record<number, string> = {
-		1: "File",
-		2: "Module",
-		3: "Namespace",
-		4: "Package",
-		5: "Class",
-		6: "Method",
-		7: "Property",
-		8: "Field",
-		9: "Constructor",
-		10: "Enum",
-		11: "Interface",
-		12: "Function",
-		13: "Variable",
-		14: "Constant",
-		15: "String",
-		16: "Number",
-		17: "Boolean",
-		18: "Array",
-		19: "Object",
-		20: "Key",
-		21: "Null",
-		22: "EnumMember",
-		23: "Struct",
-		24: "Event",
-		25: "Operator",
-		26: "TypeParameter",
+		1: 'File',
+		2: 'Module',
+		3: 'Namespace',
+		4: 'Package',
+		5: 'Class',
+		6: 'Method',
+		7: 'Property',
+		8: 'Field',
+		9: 'Constructor',
+		10: 'Enum',
+		11: 'Interface',
+		12: 'Function',
+		13: 'Variable',
+		14: 'Constant',
+		15: 'String',
+		16: 'Number',
+		17: 'Boolean',
+		18: 'Array',
+		19: 'Object',
+		20: 'Key',
+		21: 'Null',
+		22: 'EnumMember',
+		23: 'Struct',
+		24: 'Event',
+		25: 'Operator',
+		26: 'TypeParameter',
 	};
 
-	return kindNames[kind] || "Unknown";
+	return kindNames[kind] || 'Unknown';
 }

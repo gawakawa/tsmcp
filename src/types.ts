@@ -17,7 +17,7 @@ import type {
 	SymbolInformation,
 	TextEdit,
 	WorkspaceEdit,
-} from "vscode-languageserver-types";
+} from 'vscode-languageserver-types';
 
 // Re-export LSP types for convenience
 export type {
@@ -70,7 +70,7 @@ export interface SymbolDetails {
 export interface FileSystemEntry {
 	[x: string]: unknown;
 	name: string;
-	type: "file" | "directory";
+	type: 'file' | 'directory';
 	path: string;
 }
 

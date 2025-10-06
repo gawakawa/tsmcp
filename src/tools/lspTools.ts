@@ -2,8 +2,8 @@
  * LSP-specific tools for TypeScript MCP server
  */
 
-import { join } from "node:path";
-import type { TypeScriptLSPClient } from "../lsp/client.js";
+import { join } from 'node:path';
+import type { TypeScriptLSPClient } from '../lsp/client.js';
 import type {
 	CompletionItem,
 	Diagnostic,
@@ -11,26 +11,26 @@ import type {
 	Location,
 	Position,
 	TextEdit,
-} from "../types.js";
-import { createErrorResponse } from "../utils/errorHandler.js";
-import { extractPathAndPosition, uriToPath } from "../utils/pathUtils.js";
+} from '../types.js';
+import { createErrorResponse } from '../utils/errorHandler.js';
+import { extractPathAndPosition, uriToPath } from '../utils/pathUtils.js';
 
 export async function lspGetHover(
 	lspClient: TypeScriptLSPClient,
 	root: string,
 	input: string,
 ): Promise<{
-	content: Array<{ type: "text"; text: string }>;
+	content: Array<{ type: 'text'; text: string }>;
 	structuredContent?: { hover: Hover | null; file: string; position: Position };
 }> {
 	try {
 		if (!lspClient.isInitialized()) {
-			throw new Error("LSP client is not initialized");
+			throw new Error('LSP client is not initialized');
 		}
 
 		const { path: relativePath, position } = extractPathAndPosition(input);
 		if (!position) {
-			throw new Error("Position is required. Use format: file.ts:line:column");
+			throw new Error('Position is required. Use format: file.ts:line:column');
 		}
 
 		const filePath = join(root, relativePath);
@@ -40,16 +40,16 @@ export async function lspGetHover(
 		if (hover?.contents) {
 			const hoverText = Array.isArray(hover.contents)
 				? hover.contents
-						.map((c) => (typeof c === "string" ? c : c.value))
-						.join("\n")
-				: typeof hover.contents === "string"
+						.map((c) => (typeof c === 'string' ? c : c.value))
+						.join('\n')
+				: typeof hover.contents === 'string'
 					? hover.contents
 					: hover.contents.value;
 
 			// Remove existing code block markers if present to prevent double-nesting
 			const cleanedHoverText = hoverText
-				.replace(/^```[\w]*\n?/gm, "")
-				.replace(/\n?```$/gm, "")
+				.replace(/^```[\w]*\n?/gm, '')
+				.replace(/\n?```$/gm, '')
 				.trim();
 
 			text = `# Hover Information
@@ -70,12 +70,12 @@ No hover information available at this position.`;
 		}
 
 		return {
-			content: [{ type: "text", text }],
+			content: [{ type: 'text', text }],
 			structuredContent: { hover, file: relativePath, position },
 		};
 	} catch (error) {
 		return createErrorResponse(error, {
-			operation: "lsp_get_hover",
+			operation: 'lsp_get_hover',
 			file: input,
 		});
 	}
@@ -86,7 +86,7 @@ export async function lspGetDefinitions(
 	root: string,
 	input: string,
 ): Promise<{
-	content: Array<{ type: "text"; text: string }>;
+	content: Array<{ type: 'text'; text: string }>;
 	structuredContent?: {
 		definitions: Location[];
 		file: string;
@@ -95,12 +95,12 @@ export async function lspGetDefinitions(
 }> {
 	try {
 		if (!lspClient.isInitialized()) {
-			throw new Error("LSP client is not initialized");
+			throw new Error('LSP client is not initialized');
 		}
 
 		const { path: relativePath, position } = extractPathAndPosition(input);
 		if (!position) {
-			throw new Error("Position is required. Use format: file.ts:line:column");
+			throw new Error('Position is required. Use format: file.ts:line:column');
 		}
 
 		const filePath = join(root, relativePath);
@@ -115,7 +115,7 @@ export async function lspGetDefinitions(
 					const column = def.range.start.character + 1;
 					return `${index + 1}. **${defPath}**:${line}:${column}`;
 				})
-				.join("\n");
+				.join('\n');
 
 			text = `# Definition Results
 
@@ -135,12 +135,12 @@ No definitions found at this position.`;
 		}
 
 		return {
-			content: [{ type: "text", text }],
+			content: [{ type: 'text', text }],
 			structuredContent: { definitions, file: relativePath, position },
 		};
 	} catch (error) {
 		return createErrorResponse(error, {
-			operation: "lsp_get_definitions",
+			operation: 'lsp_get_definitions',
 			file: input,
 		});
 	}
@@ -152,7 +152,7 @@ export async function lspFindReferences(
 	input: string,
 	includeDeclaration = true,
 ): Promise<{
-	content: Array<{ type: "text"; text: string }>;
+	content: Array<{ type: 'text'; text: string }>;
 	structuredContent?: {
 		references: Location[];
 		file: string;
@@ -161,12 +161,12 @@ export async function lspFindReferences(
 }> {
 	try {
 		if (!lspClient.isInitialized()) {
-			throw new Error("LSP client is not initialized");
+			throw new Error('LSP client is not initialized');
 		}
 
 		const { path: relativePath, position } = extractPathAndPosition(input);
 		if (!position) {
-			throw new Error("Position is required. Use format: file.ts:line:column");
+			throw new Error('Position is required. Use format: file.ts:line:column');
 		}
 
 		const filePath = join(root, relativePath);
@@ -185,7 +185,7 @@ export async function lspFindReferences(
 					const column = ref.range.start.character + 1;
 					return `${index + 1}. **${refPath}**:${line}:${column}`;
 				})
-				.join("\n");
+				.join('\n');
 
 			text = `# References
 
@@ -205,12 +205,12 @@ No references found for this symbol.`;
 		}
 
 		return {
-			content: [{ type: "text", text }],
+			content: [{ type: 'text', text }],
 			structuredContent: { references, file: relativePath, position },
 		};
 	} catch (error) {
 		return createErrorResponse(error, {
-			operation: "lsp_find_references",
+			operation: 'lsp_find_references',
 			file: input,
 		});
 	}
@@ -222,7 +222,7 @@ export async function lspGetCompletion(
 	input: string,
 	maxResults = 20,
 ): Promise<{
-	content: Array<{ type: "text"; text: string }>;
+	content: Array<{ type: 'text'; text: string }>;
 	structuredContent?: {
 		completions: CompletionItem[];
 		file: string;
@@ -231,12 +231,12 @@ export async function lspGetCompletion(
 }> {
 	try {
 		if (!lspClient.isInitialized()) {
-			throw new Error("LSP client is not initialized");
+			throw new Error('LSP client is not initialized');
 		}
 
 		const { path: relativePath, position } = extractPathAndPosition(input);
 		if (!position) {
-			throw new Error("Position is required. Use format: file.ts:line:column");
+			throw new Error('Position is required. Use format: file.ts:line:column');
 		}
 
 		const filePath = join(root, relativePath);
@@ -248,17 +248,17 @@ export async function lspGetCompletion(
 			const completionList = completions
 				.map((completion, index) => {
 					const kind = getCompletionKindName(completion.kind || 1);
-					const detail = completion.detail ? ` - ${completion.detail}` : "";
+					const detail = completion.detail ? ` - ${completion.detail}` : '';
 					return `${index + 1}. **${completion.label}** (${kind})${detail}`;
 				})
-				.join("\n");
+				.join('\n');
 
 			text = `# Code Completion
 
 **File**: ${relativePath}
 **Position**: ${position.line + 1}:${position.character + 1}
 
-Found ${completions.length} completion(s)${allCompletions.length > maxResults ? ` (showing first ${maxResults} of ${allCompletions.length})` : ""}:
+Found ${completions.length} completion(s)${allCompletions.length > maxResults ? ` (showing first ${maxResults} of ${allCompletions.length})` : ''}:
 
 ${completionList}`;
 		} else {
@@ -271,12 +271,12 @@ No completions available at this position.`;
 		}
 
 		return {
-			content: [{ type: "text", text }],
+			content: [{ type: 'text', text }],
 			structuredContent: { completions, file: relativePath, position },
 		};
 	} catch (error) {
 		return createErrorResponse(error, {
-			operation: "lsp_get_completion",
+			operation: 'lsp_get_completion',
 			file: input,
 		});
 	}
@@ -287,12 +287,12 @@ export async function lspGetDiagnostics(
 	root: string,
 	relativePath: string,
 ): Promise<{
-	content: Array<{ type: "text"; text: string }>;
+	content: Array<{ type: 'text'; text: string }>;
 	structuredContent?: { diagnostics: Diagnostic[]; file: string };
 }> {
 	try {
 		if (!lspClient.isInitialized()) {
-			throw new Error("LSP client is not initialized");
+			throw new Error('LSP client is not initialized');
 		}
 
 		const filePath = join(root, relativePath);
@@ -306,9 +306,9 @@ export async function lspGetDiagnostics(
 					const column = diagnostic.range.start.character + 1;
 					const severity = getDiagnosticSeverityName(diagnostic.severity);
 					return `${index + 1}. **${severity}** at ${line}:${column}
-   ${diagnostic.message}${diagnostic.source ? ` (${diagnostic.source})` : ""}`;
+   ${diagnostic.message}${diagnostic.source ? ` (${diagnostic.source})` : ''}`;
 				})
-				.join("\n\n");
+				.join('\n\n');
 
 			text = `# Diagnostics
 
@@ -326,12 +326,12 @@ No diagnostics found. File appears to be error-free! ✅`;
 		}
 
 		return {
-			content: [{ type: "text", text }],
+			content: [{ type: 'text', text }],
 			structuredContent: { diagnostics, file: relativePath },
 		};
 	} catch (error) {
 		return createErrorResponse(error, {
-			operation: "lsp_get_diagnostics",
+			operation: 'lsp_get_diagnostics',
 			file: relativePath,
 		});
 	}
@@ -343,12 +343,12 @@ export async function lspFormatDocument(
 	relativePath: string,
 	options = { tabSize: 2, insertSpaces: true },
 ): Promise<{
-	content: Array<{ type: "text"; text: string }>;
+	content: Array<{ type: 'text'; text: string }>;
 	structuredContent?: { edits: TextEdit[]; file: string };
 }> {
 	try {
 		if (!lspClient.isInitialized()) {
-			throw new Error("LSP client is not initialized");
+			throw new Error('LSP client is not initialized');
 		}
 
 		const filePath = join(root, relativePath);
@@ -371,7 +371,7 @@ export async function lspFormatDocument(
 					return `${index + 1}. Replace ${startLine}:${startCol}-${endLine}:${endCol}
    New text: "${newTextPreview}"`;
 				})
-				.join("\n\n");
+				.join('\n\n');
 
 			text = `# Document Formatting
 
@@ -391,12 +391,12 @@ Document is already properly formatted. No changes needed! ✅`;
 		}
 
 		return {
-			content: [{ type: "text", text }],
+			content: [{ type: 'text', text }],
 			structuredContent: { edits, file: relativePath },
 		};
 	} catch (error) {
 		return createErrorResponse(error, {
-			operation: "lsp_format_document",
+			operation: 'lsp_format_document',
 			file: relativePath,
 		});
 	}
@@ -404,47 +404,47 @@ Document is already properly formatted. No changes needed! ✅`;
 
 function getCompletionKindName(kind: number): string {
 	const kindNames: Record<number, string> = {
-		1: "Text",
-		2: "Method",
-		3: "Function",
-		4: "Constructor",
-		5: "Field",
-		6: "Variable",
-		7: "Class",
-		8: "Interface",
-		9: "Module",
-		10: "Property",
-		11: "Unit",
-		12: "Value",
-		13: "Enum",
-		14: "Keyword",
-		15: "Snippet",
-		16: "Color",
-		17: "File",
-		18: "Reference",
-		19: "Folder",
-		20: "EnumMember",
-		21: "Constant",
-		22: "Struct",
-		23: "Event",
-		24: "Operator",
-		25: "TypeParameter",
+		1: 'Text',
+		2: 'Method',
+		3: 'Function',
+		4: 'Constructor',
+		5: 'Field',
+		6: 'Variable',
+		7: 'Class',
+		8: 'Interface',
+		9: 'Module',
+		10: 'Property',
+		11: 'Unit',
+		12: 'Value',
+		13: 'Enum',
+		14: 'Keyword',
+		15: 'Snippet',
+		16: 'Color',
+		17: 'File',
+		18: 'Reference',
+		19: 'Folder',
+		20: 'EnumMember',
+		21: 'Constant',
+		22: 'Struct',
+		23: 'Event',
+		24: 'Operator',
+		25: 'TypeParameter',
 	};
 
-	return kindNames[kind] || "Unknown";
+	return kindNames[kind] || 'Unknown';
 }
 
 function getDiagnosticSeverityName(severity?: number): string {
 	switch (severity) {
 		case 1:
-			return "Error";
+			return 'Error';
 		case 2:
-			return "Warning";
+			return 'Warning';
 		case 3:
-			return "Information";
+			return 'Information';
 		case 4:
-			return "Hint";
+			return 'Hint';
 		default:
-			return "Unknown";
+			return 'Unknown';
 	}
 }

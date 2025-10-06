@@ -2,16 +2,16 @@
  * File system tools for TypeScript MCP server
  */
 
-import { readdirSync } from "node:fs";
-import { join, relative } from "node:path";
-import type { FileSystemEntry } from "../types.js";
-import { createErrorResponse } from "../utils/errorHandler.js";
+import { readdirSync } from 'node:fs';
+import { join, relative } from 'node:path';
+import type { FileSystemEntry } from '../types.js';
+import { createErrorResponse } from '../utils/errorHandler.js';
 
 export async function listDirectory(
 	root: string,
-	relativePath = ".",
+	relativePath = '.',
 ): Promise<{
-	content: Array<{ type: "text"; text: string }>;
+	content: Array<{ type: 'text'; text: string }>;
 	structuredContent?: { entries: FileSystemEntry[]; path: string };
 }> {
 	try {
@@ -22,18 +22,18 @@ export async function listDirectory(
 			.sort((a, b) => {
 				// Directories first, then files
 				if (a.type !== b.type) {
-					return a.type === "directory" ? -1 : 1;
+					return a.type === 'directory' ? -1 : 1;
 				}
 				return a.name.localeCompare(b.name);
 			})
 			.map((entry) => {
-				const icon = entry.type === "directory" ? "📁" : "📄";
+				const icon = entry.type === 'directory' ? '📁' : '📄';
 				return `${icon} ${entry.name}`;
 			})
-			.join("\n");
+			.join('\n');
 
 		const pathDisplay =
-			relativePath === "." ? "Root Directory" : `Directory: ${relativePath}`;
+			relativePath === '.' ? 'Root Directory' : `Directory: ${relativePath}`;
 		const text = `# ${pathDisplay}
 
 Found ${entries.length} items:
@@ -43,7 +43,7 @@ ${formattedEntries}`;
 		return {
 			content: [
 				{
-					type: "text",
+					type: 'text',
 					text,
 				},
 			],
@@ -54,7 +54,7 @@ ${formattedEntries}`;
 		};
 	} catch (error) {
 		return createErrorResponse(error, {
-			operation: "listDirectory",
+			operation: 'listDirectory',
 			file: relativePath,
 		});
 	}
@@ -64,17 +64,17 @@ function getDirectoryEntries(dir: string, root: string): FileSystemEntry[] {
 	const entries: FileSystemEntry[] = [];
 
 	const excludePatterns = [
-		"node_modules",
-		".git",
-		"dist",
-		"build",
-		".next",
-		"coverage",
-		".nyc_output",
+		'node_modules',
+		'.git',
+		'dist',
+		'build',
+		'.next',
+		'coverage',
+		'.nyc_output',
 	];
 
 	function shouldExclude(name: string): boolean {
-		return excludePatterns.includes(name) || name.startsWith(".");
+		return excludePatterns.includes(name) || name.startsWith('.');
 	}
 
 	try {
@@ -88,7 +88,7 @@ function getDirectoryEntries(dir: string, root: string): FileSystemEntry[] {
 
 			entries.push({
 				name: entry.name,
-				type: entry.isDirectory() ? "directory" : "file",
+				type: entry.isDirectory() ? 'directory' : 'file',
 				path: relativePath,
 			});
 		}

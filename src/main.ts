@@ -1,9 +1,9 @@
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { z } from "zod";
-import { loadConfig } from "./config/config.js";
-import { TypeScriptLSPClient } from "./lsp/client.js";
-import { listDirectory } from "./tools/fileSystem.js";
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { z } from 'zod';
+import { loadConfig } from './config/config.js';
+import { TypeScriptLSPClient } from './lsp/client.js';
+import { listDirectory } from './tools/fileSystem.js';
 import {
 	lspFindReferences,
 	lspFormatDocument,
@@ -11,25 +11,25 @@ import {
 	lspGetDefinitions,
 	lspGetDiagnostics,
 	lspGetHover,
-} from "./tools/lspTools.js";
-import { getProjectOverview } from "./tools/projectOverview.js";
-import { getSymbolDetails, searchSymbols } from "./tools/symbolTools.js";
+} from './tools/lspTools.js';
+import { getProjectOverview } from './tools/projectOverview.js';
+import { getSymbolDetails, searchSymbols } from './tools/symbolTools.js';
 
 const config = loadConfig();
 let lspClient: TypeScriptLSPClient | undefined;
 
 const server = new McpServer({
-	name: "typescript-mcp-server",
-	version: "1.0.0",
+	name: 'typescript-mcp-server',
+	version: '1.0.0',
 });
 
 // Project overview tool
 server.registerTool(
-	"get_project_overview",
+	'get_project_overview',
 	{
-		title: "Get Project Overview",
+		title: 'Get Project Overview',
 		description:
-			"Get an overview of the TypeScript/JavaScript project structure and statistics",
+			'Get an overview of the TypeScript/JavaScript project structure and statistics',
 		inputSchema: {},
 		outputSchema: {
 			totalFiles: z.number(),
@@ -45,10 +45,10 @@ server.registerTool(
 
 // Directory listing tool
 server.registerTool(
-	"list_dir",
+	'list_dir',
 	{
-		title: "List Directory",
-		description: "List files and directories in the specified path",
+		title: 'List Directory',
+		description: 'List files and directories in the specified path',
 		inputSchema: {
 			path: z
 				.string()
@@ -59,27 +59,27 @@ server.registerTool(
 			entries: z.array(
 				z.object({
 					name: z.string(),
-					type: z.enum(["file", "directory"]),
+					type: z.enum(['file', 'directory']),
 					path: z.string(),
 				}),
 			),
 			path: z.string(),
 		},
 	},
-	async ({ path = "." }) => {
+	async ({ path = '.' }) => {
 		return await listDirectory(config.workspaceRoot, path);
 	},
 );
 
 // Symbol search tool
 server.registerTool(
-	"search_symbols",
+	'search_symbols',
 	{
-		title: "Search Symbols",
+		title: 'Search Symbols',
 		description:
-			"Search for symbols (classes, functions, variables, etc.) in the TypeScript project",
+			'Search for symbols (classes, functions, variables, etc.) in the TypeScript project',
 		inputSchema: {
-			query: z.string().describe("Symbol name to search for"),
+			query: z.string().describe('Symbol name to search for'),
 		},
 		outputSchema: {
 			symbols: z.array(
@@ -103,7 +103,7 @@ server.registerTool(
 	async ({ query }) => {
 		await ensureLSPClient();
 		if (!lspClient) {
-			throw new Error("Failed to initialize LSP client");
+			throw new Error('Failed to initialize LSP client');
 		}
 		return await searchSymbols(
 			lspClient,
@@ -116,15 +116,15 @@ server.registerTool(
 
 // Symbol details tool
 server.registerTool(
-	"get_symbol_details",
+	'get_symbol_details',
 	{
-		title: "Get Symbol Details",
+		title: 'Get Symbol Details',
 		description:
-			"Get detailed information about a symbol at a specific location (file:line:column)",
+			'Get detailed information about a symbol at a specific location (file:line:column)',
 		inputSchema: {
 			location: z
 				.string()
-				.describe("File path with position in format: file.ts:line:column"),
+				.describe('File path with position in format: file.ts:line:column'),
 		},
 		outputSchema: {
 			name: z.string(),
@@ -146,7 +146,7 @@ server.registerTool(
 	async ({ location }) => {
 		await ensureLSPClient();
 		if (!lspClient) {
-			throw new Error("Failed to initialize LSP client");
+			throw new Error('Failed to initialize LSP client');
 		}
 		return await getSymbolDetails(lspClient, config.workspaceRoot, location);
 	},
@@ -154,15 +154,15 @@ server.registerTool(
 
 // LSP hover tool
 server.registerTool(
-	"lsp_get_hover",
+	'lsp_get_hover',
 	{
-		title: "Get Hover Information",
+		title: 'Get Hover Information',
 		description:
-			"Get type information and documentation for a symbol at a specific location",
+			'Get type information and documentation for a symbol at a specific location',
 		inputSchema: {
 			location: z
 				.string()
-				.describe("File path with position in format: file.ts:line:column"),
+				.describe('File path with position in format: file.ts:line:column'),
 		},
 		outputSchema: {
 			hover: z.any().optional(),
@@ -173,7 +173,7 @@ server.registerTool(
 	async ({ location }) => {
 		await ensureLSPClient();
 		if (!lspClient) {
-			throw new Error("Failed to initialize LSP client");
+			throw new Error('Failed to initialize LSP client');
 		}
 		return await lspGetHover(lspClient, config.workspaceRoot, location);
 	},
@@ -181,14 +181,14 @@ server.registerTool(
 
 // LSP definitions tool
 server.registerTool(
-	"lsp_get_definitions",
+	'lsp_get_definitions',
 	{
-		title: "Go to Definition",
-		description: "Find the definition(s) of a symbol at a specific location",
+		title: 'Go to Definition',
+		description: 'Find the definition(s) of a symbol at a specific location',
 		inputSchema: {
 			location: z
 				.string()
-				.describe("File path with position in format: file.ts:line:column"),
+				.describe('File path with position in format: file.ts:line:column'),
 		},
 		outputSchema: {
 			definitions: z.array(
@@ -207,7 +207,7 @@ server.registerTool(
 	async ({ location }) => {
 		await ensureLSPClient();
 		if (!lspClient) {
-			throw new Error("Failed to initialize LSP client");
+			throw new Error('Failed to initialize LSP client');
 		}
 		return await lspGetDefinitions(lspClient, config.workspaceRoot, location);
 	},
@@ -215,18 +215,18 @@ server.registerTool(
 
 // LSP references tool
 server.registerTool(
-	"lsp_find_references",
+	'lsp_find_references',
 	{
-		title: "Find References",
-		description: "Find all references to a symbol at a specific location",
+		title: 'Find References',
+		description: 'Find all references to a symbol at a specific location',
 		inputSchema: {
 			location: z
 				.string()
-				.describe("File path with position in format: file.ts:line:column"),
+				.describe('File path with position in format: file.ts:line:column'),
 			includeDeclaration: z
 				.boolean()
 				.optional()
-				.describe("Include the declaration in results (default: true)"),
+				.describe('Include the declaration in results (default: true)'),
 		},
 		outputSchema: {
 			references: z.array(
@@ -245,7 +245,7 @@ server.registerTool(
 	async ({ location, includeDeclaration = true }) => {
 		await ensureLSPClient();
 		if (!lspClient) {
-			throw new Error("Failed to initialize LSP client");
+			throw new Error('Failed to initialize LSP client');
 		}
 		return await lspFindReferences(
 			lspClient,
@@ -258,18 +258,18 @@ server.registerTool(
 
 // LSP completion tool
 server.registerTool(
-	"lsp_get_completion",
+	'lsp_get_completion',
 	{
-		title: "Get Code Completion",
-		description: "Get code completion suggestions at a specific location",
+		title: 'Get Code Completion',
+		description: 'Get code completion suggestions at a specific location',
 		inputSchema: {
 			location: z
 				.string()
-				.describe("File path with position in format: file.ts:line:column"),
+				.describe('File path with position in format: file.ts:line:column'),
 			maxResults: z
 				.number()
 				.optional()
-				.describe("Maximum number of results (default: 20)"),
+				.describe('Maximum number of results (default: 20)'),
 		},
 		outputSchema: {
 			completions: z.array(
@@ -286,7 +286,7 @@ server.registerTool(
 	async ({ location, maxResults = 20 }) => {
 		await ensureLSPClient();
 		if (!lspClient) {
-			throw new Error("Failed to initialize LSP client");
+			throw new Error('Failed to initialize LSP client');
 		}
 		return await lspGetCompletion(
 			lspClient,
@@ -299,14 +299,14 @@ server.registerTool(
 
 // LSP diagnostics tool
 server.registerTool(
-	"lsp_get_diagnostics",
+	'lsp_get_diagnostics',
 	{
-		title: "Get Diagnostics",
-		description: "Get error and warning diagnostics for a file",
+		title: 'Get Diagnostics',
+		description: 'Get error and warning diagnostics for a file',
 		inputSchema: {
 			file: z
 				.string()
-				.describe("Relative path to the file from workspace root"),
+				.describe('Relative path to the file from workspace root'),
 		},
 		outputSchema: {
 			diagnostics: z.array(
@@ -326,7 +326,7 @@ server.registerTool(
 	async ({ file }) => {
 		await ensureLSPClient();
 		if (!lspClient) {
-			throw new Error("Failed to initialize LSP client");
+			throw new Error('Failed to initialize LSP client');
 		}
 		return await lspGetDiagnostics(lspClient, config.workspaceRoot, file);
 	},
@@ -334,22 +334,22 @@ server.registerTool(
 
 // LSP formatting tool
 server.registerTool(
-	"lsp_format_document",
+	'lsp_format_document',
 	{
-		title: "Format Document",
-		description: "Get formatting edits for a TypeScript/JavaScript file",
+		title: 'Format Document',
+		description: 'Get formatting edits for a TypeScript/JavaScript file',
 		inputSchema: {
 			file: z
 				.string()
-				.describe("Relative path to the file from workspace root"),
+				.describe('Relative path to the file from workspace root'),
 			tabSize: z
 				.number()
 				.optional()
-				.describe("Number of spaces per tab (default: 2)"),
+				.describe('Number of spaces per tab (default: 2)'),
 			insertSpaces: z
 				.boolean()
 				.optional()
-				.describe("Use spaces instead of tabs (default: true)"),
+				.describe('Use spaces instead of tabs (default: true)'),
 		},
 		outputSchema: {
 			edits: z.array(
@@ -367,7 +367,7 @@ server.registerTool(
 	async ({ file, tabSize = 2, insertSpaces = true }) => {
 		await ensureLSPClient();
 		if (!lspClient) {
-			throw new Error("Failed to initialize LSP client");
+			throw new Error('Failed to initialize LSP client');
 		}
 		return await lspFormatDocument(lspClient, config.workspaceRoot, file, {
 			tabSize,
@@ -388,8 +388,8 @@ async function ensureLSPClient(): Promise<void> {
 }
 
 // Cleanup function
-process.on("SIGINT", async () => {
-	console.log("\nShutting down TypeScript MCP server...");
+process.on('SIGINT', async () => {
+	console.log('\nShutting down TypeScript MCP server...');
 	if (lspClient) {
 		lspClient.cleanup();
 		await lspClient.stop();
@@ -397,8 +397,8 @@ process.on("SIGINT", async () => {
 	process.exit(0);
 });
 
-process.on("SIGTERM", async () => {
-	console.log("\nShutting down TypeScript MCP server...");
+process.on('SIGTERM', async () => {
+	console.log('\nShutting down TypeScript MCP server...');
 	if (lspClient) {
 		lspClient.cleanup();
 		await lspClient.stop();
@@ -415,14 +415,14 @@ async function main() {
 		const transport = new StdioServerTransport();
 		await server.connect(transport);
 
-		console.error("TypeScript MCP server ready!");
+		console.error('TypeScript MCP server ready!');
 	} catch (error) {
-		console.error("Failed to start TypeScript MCP server:", error);
+		console.error('Failed to start TypeScript MCP server:', error);
 		process.exit(1);
 	}
 }
 
 main().catch((error) => {
-	console.error("Failed to start MCP server:", error);
+	console.error('Failed to start MCP server:', error);
 	process.exit(1);
 });

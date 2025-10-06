@@ -2,8 +2,8 @@
  * LSP Client for TypeScript Language Server
  */
 
-import { type ChildProcess, spawn } from "node:child_process";
-import { EventEmitter } from "node:events";
+import { type ChildProcess, spawn } from 'node:child_process';
+import { EventEmitter } from 'node:events';
 import type {
 	CompletionItem,
 	Diagnostic,
@@ -19,25 +19,25 @@ import type {
 	SymbolInformation,
 	TextEdit,
 	WorkspaceEdit,
-} from "vscode-languageserver-protocol";
+} from 'vscode-languageserver-protocol';
 import {
 	createMessageConnection,
 	type MessageConnection,
 	StreamMessageReader,
 	StreamMessageWriter,
-} from "vscode-languageserver-protocol/node.js";
-import type { ErrorContext, LSPClientConfig } from "../types.js";
+} from 'vscode-languageserver-protocol/node.js';
+import type { ErrorContext, LSPClientConfig } from '../types.js';
 import {
 	isNotSupportedError,
 	TSMCPError,
 	withErrorHandling,
-} from "../utils/errorHandler.js";
+} from '../utils/errorHandler.js';
 import {
 	getLanguageId,
 	pathToUri,
 	readFileContent,
 	uriToPath,
-} from "../utils/pathUtils.js";
+} from '../utils/pathUtils.js';
 
 export class TypeScriptLSPClient extends EventEmitter {
 	private connection?: MessageConnection;
@@ -58,13 +58,13 @@ export class TypeScriptLSPClient extends EventEmitter {
 		try {
 			// Start TypeScript language server
 			const serverPath =
-				this.config.typescriptServerPath || "typescript-language-server";
-			this.serverProcess = spawn(serverPath, ["--stdio"], {
-				stdio: ["pipe", "pipe", "pipe"],
+				this.config.typescriptServerPath || 'typescript-language-server';
+			this.serverProcess = spawn(serverPath, ['--stdio'], {
+				stdio: ['pipe', 'pipe', 'pipe'],
 			});
 
 			if (!this.serverProcess.stdin || !this.serverProcess.stdout) {
-				throw new Error("Failed to create TypeScript language server process");
+				throw new Error('Failed to create TypeScript language server process');
 			}
 
 			// Create LSP connection
@@ -74,23 +74,23 @@ export class TypeScriptLSPClient extends EventEmitter {
 
 			// Handle server messages
 			this.connection.onNotification(
-				"textDocument/publishDiagnostics",
+				'textDocument/publishDiagnostics',
 				(params: PublishDiagnosticsParams) => {
 					this.diagnostics.set(params.uri, params.diagnostics);
-					this.emit("diagnostics", params);
+					this.emit('diagnostics', params);
 				},
 			);
 
 			// Handle process errors
-			this.serverProcess.on("error", (error: Error) => {
-				console.error("TypeScript language server error:", error);
-				this.emit("error", error);
+			this.serverProcess.on('error', (error: Error) => {
+				console.error('TypeScript language server error:', error);
+				this.emit('error', error);
 			});
 
-			this.serverProcess.on("exit", (code: number | null) => {
+			this.serverProcess.on('exit', (code: number | null) => {
 				console.log(`TypeScript language server exited with code: ${code}`);
 				this.initialized = false;
-				this.emit("exit", code);
+				this.emit('exit', code);
 			});
 
 			// Start listening
@@ -101,8 +101,8 @@ export class TypeScriptLSPClient extends EventEmitter {
 			this.initialized = true;
 		} catch (error) {
 			throw new TSMCPError(
-				"Failed to start TypeScript language server",
-				{ operation: "start" },
+				'Failed to start TypeScript language server',
+				{ operation: 'start' },
 				error instanceof Error ? error : undefined,
 			);
 		}
@@ -111,10 +111,10 @@ export class TypeScriptLSPClient extends EventEmitter {
 	async stop(): Promise<void> {
 		if (this.connection) {
 			try {
-				await this.connection.sendRequest("shutdown");
-				this.connection.sendNotification("exit");
+				await this.connection.sendRequest('shutdown');
+				this.connection.sendNotification('exit');
 			} catch (error) {
-				console.warn("Error during LSP shutdown:", error);
+				console.warn('Error during LSP shutdown:', error);
 			}
 		}
 
@@ -133,7 +133,7 @@ export class TypeScriptLSPClient extends EventEmitter {
 
 	private async initialize(): Promise<void> {
 		if (!this.connection) {
-			throw new Error("Connection not established");
+			throw new Error('Connection not established');
 		}
 
 		const initParams: InitializeParams = {
@@ -173,12 +173,12 @@ export class TypeScriptLSPClient extends EventEmitter {
 						completionItem: {
 							snippetSupport: true,
 							commitCharactersSupport: true,
-							documentationFormat: ["markdown", "plaintext"],
+							documentationFormat: ['markdown', 'plaintext'],
 						},
 					},
 					hover: {
 						dynamicRegistration: true,
-						contentFormat: ["markdown", "plaintext"],
+						contentFormat: ['markdown', 'plaintext'],
 					},
 					signatureHelp: {
 						dynamicRegistration: true,
@@ -223,11 +223,11 @@ export class TypeScriptLSPClient extends EventEmitter {
 		};
 
 		const result = await this.connection.sendRequest<InitializeResult>(
-			"initialize",
+			'initialize',
 			initParams,
 		);
 		this.serverCapabilities = result.capabilities;
-		this.connection.sendNotification("initialized");
+		this.connection.sendNotification('initialized');
 
 		// Wait for TypeScript project to be fully loaded
 		await this.waitForProjectReady();
@@ -242,28 +242,28 @@ export class TypeScriptLSPClient extends EventEmitter {
 			try {
 				// Try a simple workspace symbol query to verify project is loaded
 				const result = await this.connection.sendRequest<unknown>(
-					"workspace/symbol",
-					{ query: "" },
+					'workspace/symbol',
+					{ query: '' },
 				);
 
 				// If we get a result (even empty array), project is ready
 				if (result !== null && result !== undefined) {
-					console.log("TypeScript project loaded successfully");
+					console.log('TypeScript project loaded successfully');
 					return;
 				}
 			} catch (error) {
 				// Project not ready yet, wait and retry
-				if (error instanceof Error && error.message.includes("No Project")) {
+				if (error instanceof Error && error.message.includes('No Project')) {
 					await new Promise((resolve) => setTimeout(resolve, 500));
 					continue;
 				}
 				// Other errors should be logged but not thrown
-				console.warn("Error checking project readiness:", error);
+				console.warn('Error checking project readiness:', error);
 			}
 		}
 
 		console.warn(
-			"TypeScript project may not be fully loaded after initialization",
+			'TypeScript project may not be fully loaded after initialization',
 		);
 	}
 
@@ -272,29 +272,29 @@ export class TypeScriptLSPClient extends EventEmitter {
 
 		const caps = this.serverCapabilities as Record<string, unknown>;
 		switch (feature) {
-			case "hover":
+			case 'hover':
 				return !!caps.hoverProvider;
-			case "completion":
+			case 'completion':
 				return !!caps.completionProvider;
-			case "definition":
+			case 'definition':
 				return !!caps.definitionProvider;
-			case "references":
+			case 'references':
 				return !!caps.referencesProvider;
-			case "rename":
+			case 'rename':
 				return !!caps.renameProvider;
-			case "documentSymbol":
+			case 'documentSymbol':
 				return !!caps.documentSymbolProvider;
-			case "workspaceSymbol":
+			case 'workspaceSymbol':
 				return !!caps.workspaceSymbolProvider;
-			case "codeAction":
+			case 'codeAction':
 				return !!caps.codeActionProvider;
-			case "formatting":
+			case 'formatting':
 				return !!caps.documentFormattingProvider;
-			case "rangeFormatting":
+			case 'rangeFormatting':
 				return !!caps.documentRangeFormattingProvider;
-			case "signatureHelp":
+			case 'signatureHelp':
 				return !!caps.signatureHelpProvider;
-			case "diagnostics":
+			case 'diagnostics':
 				return true; // Usually always supported
 			default:
 				return false;
@@ -318,7 +318,7 @@ export class TypeScriptLSPClient extends EventEmitter {
 		this.documentVersions.set(uri, version);
 		this.openDocuments.add(uri);
 
-		this.connection.sendNotification("textDocument/didOpen", {
+		this.connection.sendNotification('textDocument/didOpen', {
 			textDocument: {
 				uri,
 				languageId: actualLanguageId,
@@ -331,7 +331,7 @@ export class TypeScriptLSPClient extends EventEmitter {
 	private closeDocument(uri: string): void {
 		if (!this.connection || !this.openDocuments.has(uri)) return;
 
-		this.connection.sendNotification("textDocument/didClose", {
+		this.connection.sendNotification('textDocument/didClose', {
 			textDocument: { uri },
 		});
 
@@ -354,20 +354,20 @@ export class TypeScriptLSPClient extends EventEmitter {
 	// LSP operations
 	async getHover(filePath: string, position: Position): Promise<Hover | null> {
 		const context: ErrorContext = {
-			operation: "getHover",
+			operation: 'getHover',
 			file: filePath,
 			position,
 		};
 
 		return withErrorHandling(async () => {
-			if (!this.connection) throw new Error("LSP client not initialized");
-			if (!this.supportsFeature("hover"))
-				throw new Error("Hover not supported");
+			if (!this.connection) throw new Error('LSP client not initialized');
+			if (!this.supportsFeature('hover'))
+				throw new Error('Hover not supported');
 
 			const uri = this.ensureDocumentOpen(filePath);
 
 			const result = await this.connection.sendRequest<Hover | null>(
-				"textDocument/hover",
+				'textDocument/hover',
 				{
 					textDocument: { uri },
 					position,
@@ -383,20 +383,20 @@ export class TypeScriptLSPClient extends EventEmitter {
 		position: Position,
 	): Promise<Location[]> {
 		const context: ErrorContext = {
-			operation: "getDefinition",
+			operation: 'getDefinition',
 			file: filePath,
 			position,
 		};
 
 		return withErrorHandling(async () => {
-			if (!this.connection) throw new Error("LSP client not initialized");
-			if (!this.supportsFeature("definition"))
-				throw new Error("Definition not supported");
+			if (!this.connection) throw new Error('LSP client not initialized');
+			if (!this.supportsFeature('definition'))
+				throw new Error('Definition not supported');
 
 			const uri = this.ensureDocumentOpen(filePath);
 
 			const result = await this.connection.sendRequest(
-				"textDocument/definition",
+				'textDocument/definition',
 				{
 					textDocument: { uri },
 					position,
@@ -416,20 +416,20 @@ export class TypeScriptLSPClient extends EventEmitter {
 		includeDeclaration = true,
 	): Promise<Location[]> {
 		const context: ErrorContext = {
-			operation: "getReferences",
+			operation: 'getReferences',
 			file: filePath,
 			position,
 		};
 
 		return withErrorHandling(async () => {
-			if (!this.connection) throw new Error("LSP client not initialized");
-			if (!this.supportsFeature("references"))
-				throw new Error("References not supported");
+			if (!this.connection) throw new Error('LSP client not initialized');
+			if (!this.supportsFeature('references'))
+				throw new Error('References not supported');
 
 			const uri = this.ensureDocumentOpen(filePath);
 
 			const result = await this.connection.sendRequest<Location[] | null>(
-				"textDocument/references",
+				'textDocument/references',
 				{
 					textDocument: { uri },
 					position,
@@ -445,20 +445,20 @@ export class TypeScriptLSPClient extends EventEmitter {
 		filePath: string,
 	): Promise<DocumentSymbol[] | SymbolInformation[]> {
 		const context: ErrorContext = {
-			operation: "getDocumentSymbols",
+			operation: 'getDocumentSymbols',
 			file: filePath,
 		};
 
 		return withErrorHandling(async () => {
-			if (!this.connection) throw new Error("LSP client not initialized");
-			if (!this.supportsFeature("documentSymbol"))
-				throw new Error("Document symbols not supported");
+			if (!this.connection) throw new Error('LSP client not initialized');
+			if (!this.supportsFeature('documentSymbol'))
+				throw new Error('Document symbols not supported');
 
 			const uri = this.ensureDocumentOpen(filePath);
 
 			const result = await this.connection.sendRequest<
 				DocumentSymbol[] | SymbolInformation[] | null
-			>("textDocument/documentSymbol", {
+			>('textDocument/documentSymbol', {
 				textDocument: { uri },
 			});
 
@@ -468,18 +468,18 @@ export class TypeScriptLSPClient extends EventEmitter {
 
 	async getWorkspaceSymbols(query: string): Promise<SymbolInformation[]> {
 		const context: ErrorContext = {
-			operation: "getWorkspaceSymbols",
+			operation: 'getWorkspaceSymbols',
 			symbolName: query,
 		};
 
 		return withErrorHandling(async () => {
-			if (!this.connection) throw new Error("LSP client not initialized");
-			if (!this.supportsFeature("workspaceSymbol"))
-				throw new Error("Workspace symbols not supported");
+			if (!this.connection) throw new Error('LSP client not initialized');
+			if (!this.supportsFeature('workspaceSymbol'))
+				throw new Error('Workspace symbols not supported');
 
 			const result = await this.connection.sendRequest<
 				SymbolInformation[] | null
-			>("workspace/symbol", {
+			>('workspace/symbol', {
 				query,
 			});
 
@@ -492,20 +492,20 @@ export class TypeScriptLSPClient extends EventEmitter {
 		position: Position,
 	): Promise<CompletionItem[]> {
 		const context: ErrorContext = {
-			operation: "getCompletion",
+			operation: 'getCompletion',
 			file: filePath,
 			position,
 		};
 
 		return withErrorHandling(async () => {
-			if (!this.connection) throw new Error("LSP client not initialized");
-			if (!this.supportsFeature("completion"))
-				throw new Error("Completion not supported");
+			if (!this.connection) throw new Error('LSP client not initialized');
+			if (!this.supportsFeature('completion'))
+				throw new Error('Completion not supported');
 
 			const uri = this.ensureDocumentOpen(filePath);
 
 			const result = await this.connection.sendRequest(
-				"textDocument/completion",
+				'textDocument/completion',
 				{
 					textDocument: { uri },
 					position,
@@ -529,19 +529,19 @@ export class TypeScriptLSPClient extends EventEmitter {
 		options: FormattingOptions,
 	): Promise<TextEdit[]> {
 		const context: ErrorContext = {
-			operation: "formatDocument",
+			operation: 'formatDocument',
 			file: filePath,
 		};
 
 		return withErrorHandling(async () => {
-			if (!this.connection) throw new Error("LSP client not initialized");
-			if (!this.supportsFeature("formatting"))
-				throw new Error("Document formatting not supported");
+			if (!this.connection) throw new Error('LSP client not initialized');
+			if (!this.supportsFeature('formatting'))
+				throw new Error('Document formatting not supported');
 
 			const uri = this.ensureDocumentOpen(filePath);
 
 			const result = await this.connection.sendRequest<TextEdit[] | null>(
-				"textDocument/formatting",
+				'textDocument/formatting',
 				{
 					textDocument: { uri },
 					options,
@@ -558,21 +558,21 @@ export class TypeScriptLSPClient extends EventEmitter {
 		newName: string,
 	): Promise<WorkspaceEdit | null> {
 		const context: ErrorContext = {
-			operation: "renameSymbol",
+			operation: 'renameSymbol',
 			file: filePath,
 			position,
 		};
 
 		return withErrorHandling(async () => {
-			if (!this.connection) throw new Error("LSP client not initialized");
-			if (!this.supportsFeature("rename"))
-				throw new Error("Rename not supported");
+			if (!this.connection) throw new Error('LSP client not initialized');
+			if (!this.supportsFeature('rename'))
+				throw new Error('Rename not supported');
 
 			const uri = this.ensureDocumentOpen(filePath);
 
 			try {
 				const result = await this.connection.sendRequest<WorkspaceEdit | null>(
-					"textDocument/rename",
+					'textDocument/rename',
 					{
 						textDocument: { uri },
 						position,

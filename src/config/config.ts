@@ -2,25 +2,25 @@
  * Configuration for TypeScript MCP server
  */
 
-import type { TSMCPConfig } from "../types.js";
+import type { TSMCPConfig } from '../types.js';
 
 export function getDefaultConfig(): TSMCPConfig {
 	return {
 		workspaceRoot: process.cwd(),
 		timeout: 5000,
 		maxResults: 50,
-		filePatterns: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
+		filePatterns: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
 		excludePatterns: [
-			"node_modules/**",
-			".git/**",
-			"dist/**",
-			"build/**",
-			".next/**",
-			"coverage/**",
-			"**/*.test.ts",
-			"**/*.test.tsx",
-			"**/*.spec.ts",
-			"**/*.spec.tsx",
+			'node_modules/**',
+			'.git/**',
+			'dist/**',
+			'build/**',
+			'.next/**',
+			'coverage/**',
+			'**/*.test.ts',
+			'**/*.test.tsx',
+			'**/*.spec.ts',
+			'**/*.spec.tsx',
 		],
 	};
 }
