@@ -105,9 +105,35 @@ export async function getSymbolDetails(
 		// Get references
 		const references = await lspClient.getReferences(filePath, targetPosition);
 
-		// Extract symbol name from hover or file content
+		// Extract symbol name from file content or hover information
 		let symbolName = "Unknown";
-		if (hover?.contents) {
+
+		// Try to read the symbol from the file at the given position
+		try {
+			const content = readFileContent(filePath);
+			const lines = content.split("\n");
+			if (targetPosition.line < lines.length) {
+				const line = lines[targetPosition.line];
+				const char = targetPosition.character;
+
+				// Extract word at position
+				let start = char;
+				let end = char;
+
+				// Find word boundaries (alphanumeric, underscore, and $ for JS identifiers)
+				while (start > 0 && /[\w$]/.test(line[start - 1])) start--;
+				while (end < line.length && /[\w$]/.test(line[end])) end++;
+
+				if (start < end) {
+					symbolName = line.substring(start, end);
+				}
+			}
+		} catch {
+			// If file reading fails, fall back to hover text parsing
+		}
+
+		// If we still don't have a good symbol name, try parsing hover text
+		if (symbolName === "Unknown" && hover?.contents) {
 			const hoverText = Array.isArray(hover.contents)
 				? hover.contents
 						.map((c) => (typeof c === "string" ? c : c.value))
@@ -116,10 +142,21 @@ export async function getSymbolDetails(
 					? hover.contents
 					: hover.contents.value;
 
-			// Extract symbol name from hover text
-			const match = hoverText.match(/^\(?(\w+)\)?/);
-			if (match) {
-				symbolName = match[1];
+			// Try multiple patterns to extract symbol name
+			const patterns = [
+				/(?:const|let|var|function|class|interface|type|enum)\s+(\w+)/,
+				/(?:property|method|parameter)\s+(\w+)/i,
+				/^\s*(\w+)\s*:/,
+				/^\s*(\w+)\s*\(/,
+				/^\(?(\w+)\)?/,
+			];
+
+			for (const pattern of patterns) {
+				const match = hoverText.match(pattern);
+				if (match?.[1]) {
+					symbolName = match[1];
+					break;
+				}
 			}
 		}
 
@@ -185,7 +222,7 @@ async function searchSymbolsInFiles(
 
 				const fullPath = join(dir, entry.name);
 
-				if (entry.isDirectory() && !shouldExcludeDirctory(entry.name)) {
+				if (entry.isDirectory() && !shouldExcludeDirectory(entry.name)) {
 					walkDirectory(fullPath);
 				} else if (entry.isFile() && isTypeScriptFile(fullPath)) {
 					searchInFile(fullPath);
@@ -238,7 +275,7 @@ async function searchSymbolsInFiles(
 	return results;
 }
 
-function shouldExcludeDirctory(name: string): boolean {
+function shouldExcludeDirectory(name: string): boolean {
 	return [
 		"node_modules",
 		".git",
