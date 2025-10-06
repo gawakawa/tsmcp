@@ -195,6 +195,10 @@ tsmcp/
 │   │   ├── pathUtils.ts       # Path and URI utilities
 │   │   └── errorHandler.ts    # Error handling utilities
 │   └── types.ts               # Type definitions
+├── tests/                    # Test files (mirrors src/ structure)
+│   └── utils/
+│       ├── pathUtils.test.ts
+│       └── errorHandler.test.ts
 ├── package.json              # pnpm configuration and scripts
 ├── tsconfig.json             # TypeScript configuration
 ├── biome.json                # Biome formatter/linter config
@@ -246,12 +250,23 @@ pnpm start 2>debug.log
 
 ## Testing
 
+This project uses [Vitest](https://vitest.dev/) for automated testing.
+
 ```bash
-# Run tests (when implemented)
+# Run tests once
 pnpm test
+
+# Run tests in watch mode
+pnpm test:watch
+
+# Run tests with UI
+pnpm test:ui
+
+# Run tests with coverage report
+pnpm test:coverage
 ```
 
-Currently, the project uses manual testing with MCP clients. Automated tests are planned for future development.
+Test files are located in the `/tests/` directory, mirroring the structure of `/src/`.
 
 ## Development
 

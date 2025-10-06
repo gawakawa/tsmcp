@@ -25,6 +25,12 @@ pnpm build                      # Build for production
 # Type Checking
 pnpm type-check                 # Type check all TypeScript files
 
+# Testing (using Vitest)
+pnpm test                       # Run tests once
+pnpm test:watch                 # Run tests in watch mode
+pnpm test:ui                    # Run tests with UI
+pnpm test:coverage              # Run tests with coverage report
+
 # Formatting and Linting (using Biome)
 pnpm format                     # Format all files
 pnpm format:check              # Check formatting without changes
@@ -96,6 +102,10 @@ tsmcp/
 │   │   ├── pathUtils.ts       # Path and URI utilities
 │   │   └── errorHandler.ts    # Error handling utilities
 │   └── types.ts               # Type definitions
+├── tests/                    # Test files (mirrors src/ structure)
+│   └── utils/
+│       ├── pathUtils.test.ts
+│       └── errorHandler.test.ts
 ├── package.json              # pnpm configuration and scripts
 ├── tsconfig.json             # TypeScript configuration
 ├── biome.json                # Biome formatter/linter config
@@ -112,10 +122,21 @@ tsmcp/
 
 ### Testing Strategy
 
-- Manual testing with MCP clients (e.g., Claude Desktop, Claude Code)
+**Automated Testing with Vitest:**
+
+- Test files use `.test.ts` extension and are located in `/tests/` directory
+- Directory structure in `/tests/` mirrors `/src/` structure
+- Unit tests for utility functions (pathUtils, errorHandler)
+- Integration tests for MCP tools and LSP client
+- Run `pnpm test` to execute all tests
+- Use `pnpm test:watch` during development for immediate feedback
+- Coverage reports available via `pnpm test:coverage`
+
+**Manual Testing:**
+
+- Test with MCP clients (e.g., Claude Desktop, Claude Code)
 - Test with real TypeScript projects of various sizes
 - Verify LSP features work correctly across different scenarios
-- Automated tests planned for future development
 
 ## LSP Integration
 
