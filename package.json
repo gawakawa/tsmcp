@@ -5,7 +5,6 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx src/main.ts",
-    "mcp": "tsx src/main.ts",
     "start": "node dist/main.js",
     "build": "tsc",
     "type-check": "tsc --noEmit",
@@ -13,6 +12,7 @@
     "format:check": "biome check src/",
     "lint": "biome lint src/",
     "lint:fix": "biome lint --write src/",
+    "check": "biome check --write src/",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -29,6 +29,9 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.19.1",
     "express": "^5.1.0",
+    "typescript-language-server": "^5.0.0",
+    "vscode-languageserver-protocol": "^3.17.5",
+    "vscode-languageserver-types": "^3.17.5",
     "zod": "^3.25.76"
   }
 }
