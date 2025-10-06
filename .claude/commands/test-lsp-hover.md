@@ -1,1 +1,1 @@
-ホバー情報を取得するために `mcp__tsmcp__lsp_get_hover --relativePath "src/main.ts" --line 1 --character 0` を実行してください。
+ホバー情報を取得するために `mcp__tsmcp__lsp_get_hover --location "src/main.ts:21:7"` を実行してください。

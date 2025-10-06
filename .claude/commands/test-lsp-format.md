@@ -1,1 +1,1 @@
-ドキュメントをフォーマットするために `mcp__tsmcp__lsp_format_document --relativePath "src/main.ts"` を実行してください。
+ドキュメントをフォーマットするために `mcp__tsmcp__lsp_format_document --file "src/main.ts"` を実行してください。

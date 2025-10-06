@@ -1,1 +1,1 @@
-参照検索機能をテストするために `mcp__tsmcp__lsp_find_references --symbolName "main"` を実行してください。
+参照検索機能をテストするために `mcp__tsmcp__lsp_find_references --location "src/main.ts:409:15"` を実行してください。

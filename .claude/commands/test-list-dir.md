@@ -1,1 +1,1 @@
-ディレクトリ構造を確認するために `mcp__tsmcp__list_dir --relativePath "src"` を実行してください。
+ディレクトリ構造を確認するために `mcp__tsmcp__list_dir --path "src"` を実行してください。

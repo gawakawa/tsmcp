@@ -1,1 +1,1 @@
-プロジェクト内のシンボルを検索するために `mcp__tsmcp__search_symbols` を実行してください。
+プロジェクト内のシンボルを検索するために `mcp__tsmcp__search_symbols --query "McpServer"` を実行してください。
