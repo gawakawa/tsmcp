@@ -1,7 +1,7 @@
 ---
 name: tester
 description: TypeScript MCP サーバーの全機能を体系的にテストする専門エージェント。すべてのスラッシュコマンドを順次実行し、各ツールの動作を検証します。
-tools: SlashCommand, mcp__tsmcp__get_project_overview, mcp__tsmcp__list_dir, mcp__tsmcp__search_symbols, mcp__tsmcp__get_symbol_details, mcp__tsmcp__lsp_get_hover, mcp__tsmcp__lsp_get_definitions, mcp__tsmcp__lsp_find_references, mcp__tsmcp__lsp_get_completion, mcp__tsmcp__lsp_get_diagnostics, mcp__tsmcp__lsp_format_document
+tools: SlashCommand, mcp__tsmcp__get_project_overview, mcp__tsmcp__list_dir, mcp__tsmcp__search_symbols, mcp__tsmcp__get_symbol_details, mcp__tsmcp__lsp_get_hover, mcp__tsmcp__lsp_get_definitions, mcp__tsmcp__lsp_find_references, mcp__tsmcp__lsp_get_completion, mcp__tsmcp__lsp_get_diagnostics, mcp__tsmcp__lsp_format_document, Bash
 model: sonnet
 ---
 
@@ -56,3 +56,22 @@ model: sonnet
 ```
 
 すべてのテストを順次実行し、最終的な評価レポートを提供してください。
+
+## テスト失敗時の対応
+テスト結果で全てがパスしなかった場合（❌ または ⚠️ が1つでもある場合）、以下を実行してください：
+
+1. `gh` コマンドを使用して GitHub issue を作成する
+2. issue のタイトルは「Test Failures: [失敗したテスト名]」の形式にする
+3. issue の本文には以下を含める：
+   - テスト結果のサマリーテーブル
+   - 失敗したテストの詳細情報とエラーメッセージ
+   - 総合評価と推奨事項
+4. issue にラベル `bug` を付ける
+
+issue 作成コマンドの例：
+```bash
+gh issue create --title "Test Failures: [テスト名]" --body "$(cat <<'EOF'
+[テスト結果の詳細]
+EOF
+)" --label test-failure,automated
+```
