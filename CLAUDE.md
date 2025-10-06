@@ -122,6 +122,23 @@ tsmcp/
 
 ### Testing Strategy
 
+**Test-Driven Development (TDD):**
+
+- **MUST** follow Test-Driven Development methodology as advocated by Kent Beck and popularized by t-wada (Takuto Wada)
+- Write tests BEFORE implementation (Red-Green-Refactor cycle):
+  1. **Red**: Write a failing test that defines the desired functionality
+  2. **Green**: Write minimal code to make the test pass
+  3. **Refactor**: Improve code quality while keeping tests green
+- Every new feature or bug fix MUST start with a test
+- This ensures code is testable, maintainable, and meets requirements from the start
+
+**Test Coverage Requirements:**
+
+- **MANDATORY**: Test coverage MUST be maintained at 80% or above at all times
+- Run `pnpm test:coverage` to verify coverage before committing code
+- Coverage below 80% is considered unacceptable and must be addressed immediately
+- Focus on meaningful tests that verify actual behavior, not just coverage metrics
+
 **Automated Testing with Vitest:**
 
 - Test files use `.test.ts` extension and are located in `/tests/` directory

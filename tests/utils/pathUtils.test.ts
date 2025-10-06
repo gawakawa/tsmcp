@@ -2,15 +2,20 @@
  * Tests for path utilities
  */
 
+import { writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
 	extractPathAndPosition,
+	findSymbolInLine,
 	getLanguageId,
 	getRelativePath,
 	isTypeScriptFile,
 	normalizeUri,
 	parseLineNumber,
 	pathToUri,
+	readFileContent,
 	resolveRelativePath,
 	uriToPath,
 } from "../../src/utils/pathUtils.js";
@@ -157,6 +162,57 @@ describe("pathUtils", () => {
 			const result = extractPathAndPosition("/root/src/file.ts:10:5");
 			expect(result.path).toBe("/root/src/file.ts");
 			expect(result.position).toEqual({ line: 9, character: 4 });
+		});
+	});
+
+	describe("readFileContent", () => {
+		it("should read file content successfully", () => {
+			const tmpFile = join(tmpdir(), `test-${Date.now()}.txt`);
+			const content = "test content";
+			writeFileSync(tmpFile, content);
+
+			const result = readFileContent(tmpFile);
+			expect(result).toBe(content);
+		});
+
+		it("should throw error for non-existent file", () => {
+			const nonExistentFile = "/path/to/nonexistent/file.txt";
+			expect(() => readFileContent(nonExistentFile)).toThrow(/Failed to read file/);
+		});
+	});
+
+	describe("findSymbolInLine", () => {
+		const testContent = "const foo = 42;\nfunction bar() {}\n  let baz = true;";
+
+		it("should find symbol in line", () => {
+			const result = findSymbolInLine(testContent, 0, "foo");
+			expect(result).toEqual({ line: 0, character: 6 });
+		});
+
+		it("should return null for symbol not in line", () => {
+			const result = findSymbolInLine(testContent, 0, "bar");
+			expect(result).toBeNull();
+		});
+
+		it("should return first non-whitespace position when no symbol specified", () => {
+			const result = findSymbolInLine(testContent, 2);
+			expect(result).toEqual({ line: 2, character: 2 });
+		});
+
+		it("should return position 0 for empty line when no symbol specified", () => {
+			const emptyLineContent = "\n\n";
+			const result = findSymbolInLine(emptyLineContent, 0);
+			expect(result).toEqual({ line: 0, character: 0 });
+		});
+
+		it("should return null for line out of bounds", () => {
+			const result = findSymbolInLine(testContent, 100, "foo");
+			expect(result).toBeNull();
+		});
+
+		it("should return null for negative line number", () => {
+			const result = findSymbolInLine(testContent, -1, "foo");
+			expect(result).toBeNull();
 		});
 	});
 });
