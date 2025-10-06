@@ -1,7 +1,7 @@
 ---
 name: tester
 description: TypeScript MCP サーバーの全機能を体系的にテストする専門エージェント。すべてのスラッシュコマンドを順次実行し、各ツールの動作を検証します。
-tools: SlashCommand
+tools: SlashCommand, mcp__tsmcp__get_project_overview, mcp__tsmcp__list_dir, mcp__tsmcp__search_symbols, mcp__tsmcp__get_symbol_details, mcp__tsmcp__lsp_get_hover, mcp__tsmcp__lsp_get_definitions, mcp__tsmcp__lsp_find_references, mcp__tsmcp__lsp_get_completion, mcp__tsmcp__lsp_get_diagnostics, mcp__tsmcp__lsp_format_document
 model: sonnet
 ---
 
